@@ -35,5 +35,13 @@ namespace JWT_API.Controllers
             var result = await _userService.GetTokenAsync(model);
             return Ok(result);
         }
+
+        [HttpPost("add_role")]
+        
+        public async Task<IActionResult> AddRoleAsync(AddRoleModel model)
+        {
+            var result = await _userService.AddRoleAsync(model);
+            return Ok(result);
+        }
     }
 }

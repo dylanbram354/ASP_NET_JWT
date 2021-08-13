@@ -12,5 +12,6 @@ namespace JWT_API.Services
                                                                //Receives UserForRegistration object as argument.
         Task<AuthenticationResponse> GetTokenAsync(UserForAuthentication model); //Method signature for login; implemented by UserService class and called by UserController.
                                                                                  //Receives UserForAuthentication object as argument.
+        Task<string> AddRoleAsync(AddRoleModel model); //Adding a user to a role
     }
 }

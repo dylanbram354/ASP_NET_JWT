@@ -1,4 +1,5 @@
-﻿using JWT_API.DataTransferObjects;
+﻿using JWT_API.Data;
+using JWT_API.DataTransferObjects;
 using JWT_API.Models;
 using JWT_API.Settings;
 using Microsoft.AspNetCore.Identity;
@@ -20,11 +21,13 @@ namespace JWT_API.Services
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly JWT _jwt;
-        public UserService(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IOptions<JWT> jwt) //constructor setting up references to framework stuff
+        private readonly ApplicationDbContext _context;
+        public UserService(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IOptions<JWT> jwt, ApplicationDbContext context) //constructor setting up references to framework stuff
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _jwt = jwt.Value;
+            _context = context;
         }
 
         public async Task<Dictionary<string, string>> RegisterAsync(UserForRegistration model) //passing in a UserForRegistration object which will be converted to a User
@@ -129,6 +132,30 @@ namespace JWT_API.Services
                 expires: DateTime.UtcNow.AddMinutes(_jwt.DurationInMinutes),
                 signingCredentials: signingCredentials);
             return jwtSecurityToken;
+        }
+
+        public async Task<string> AddRoleAsync(AddRoleModel model) //Adding a user to a role when they submit their username, password, and the name of the role.
+                                                                   //This could be modified on the UserController to require Admin authorization if needed.
+        {
+            var user = await _userManager.FindByNameAsync(model.UserName);
+            if(user == null)
+            {
+                return $"No accounts with username {model.UserName}.";
+            }
+            if (await _userManager.CheckPasswordAsync(user, model.Password))
+            {
+                var validRoles = _context.Roles.Select(r => r.NormalizedName).ToList();
+                if (validRoles.Contains(model.Role.ToUpper()))
+                {
+                    await _userManager.AddToRoleAsync(user, model.Role);
+                    return $"Added {model.Role} to user {model.UserName}.";
+                }
+                else
+                {
+                    return $"Role {model.Role} not found.";
+                }
+            }
+            return $"Incorrect Credentials for user {user.UserName}.";
         }
     }
 }

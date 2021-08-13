@@ -19,6 +19,6 @@ namespace JWT_API.DataTransferObjects
         [Required]
         public string Password { get; set; }
 
-        //public string Role { get; set; } (this would be here if you wanted users to be able to freely select a role at registration time
+        //public string Role { get; set; } (this would be here if you wanted users to be able to freely select a role at registration time)
     }
 }
